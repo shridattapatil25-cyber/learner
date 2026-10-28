@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robotics Learning Hub</title>
+  <style>
+    :root{
+      --bg:#f4f7fb; --panel:#ffffff; --panel2:#eef4fb; --text:#1d2a39; --muted:#53657b;
+      --primary:#0d4d8c; --accent:#dfeefd; --success:#1f8f5f; --danger:#b42318; --warn:#a15b00;
+      --border:#cfe0ef; --focus:#ffbf47;
+      --shadow:0 8px 20px rgba(13,77,140,.08);
+    }
+    *{box-sizing:border-box}
+    html{font-size:16px}
+    body{
+      margin:0; font-family:Segoe UI, Arial, sans-serif; background:var(--bg); color:var(--text);
+      line-height:1.6;
+    }
+    body.large{font-size:1.12rem}
+    body.xlarge{font-size:1.22rem}
+    body.high-contrast{
+      --bg:#111; --panel:#1a1a1a; --panel2:#242424; --text:#f3f3f3; --muted:#dfe7ef;
+      --primary:#88c5ff; --accent:#1b1b1b; --success:#7df7ba; --danger:#ff8c8c; --warn:#ffd166;
+      --border:#666; --focus:#ffc800;
+    }
+    a{color:var(--primary)}
+    button,input,select,textarea{font:inherit; min-height:44px; border-radius:10px}
+    button,input,select,textarea:focus-visible,a:focus-visible{
+      outline:3px solid var(--focus); outline-offset:2px;
+    }
+    .skip-link{
+      position:absolute; left:-9999px; top:0; background:var(--panel); color:var(--text); padding:.75rem 1rem; z-index:999;
+    }
+    .skip-link:focus{left:1rem; top:1rem}
+    .container{max-width:1100px; margin:0 auto; padding:0 1rem}
+    .header{
+      position:sticky; top:0; z-index:10; background:var(--panel); border-bottom:1px solid var(--border); box-shadow:0 2px 10px rgba(0,0,0,.03)
+    }
+    .nav{
+      display:flex; justify-content:space-between; align-items:center; padding:0.9rem 0; gap:1rem; flex-wrap:wrap;
+    }
+    .brand{display:flex; align-items:center; gap:0.75rem}
+    .brand h1{margin:0; font-size:1.3rem}
+    .nav-links{display:flex; flex-wrap:wrap; gap:.7rem; list-style:none; padding:0; margin:0}
+    .nav-links button{background:transparent; border:1px solid var(--border); padding:.6rem .9rem; cursor:pointer}
+    .page{display:none; padding:2rem 0 3rem}
+    .page.active{display:block}
+    .card{
+      background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:1.4rem;
+      box-shadow:var(--shadow);
+    }
+    .hero{text-align:center}
+    .eyebrow{font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:.5rem}
+    .grade-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:1rem; margin:1rem 0}
+    .grade-btn,.primary,.secondary,.small-btn,.option-btn,.match-item,.drop-zone{
+      background:var(--panel2); border:1px solid var(--border); color:var(--text); cursor:pointer; padding:.9rem 1rem; min-height:44px;
+    }
+    .primary{
+      background:var(--primary); color:#fff; border-color:var(--primary);
+    }
+    .secondary{background:transparent}
+    .danger{border-color:var(--danger); color:var(--danger)}
+    .actions,.settings,.row{display:flex; flex-wrap:wrap; gap:.75rem; align-items:center}
+    .settings{justify-content:center; margin-top:1rem}
+    .unit-list{display:grid; gap:1rem}
+    .topic-btn{display:flex; justify-content:space-between; align-items:center; width:100%; text-align:left; border:1px solid var(--border); background:var(--panel); padding:1rem; border-radius:12px; cursor:pointer}
+    .session-head{display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap}
+    .progress-bar{
+      height:12px; border-radius:999px; background:var(--panel2); overflow:hidden; margin:1rem 0 1.5rem;
+    }
+    .progress-fill{
+      width:15%; height:100%; background:var(--success); border-radius:inherit; transition:width .2s ease;
+    }
+    section{margin-bottom:1.5rem}
+    .vocab{
+      display:inline-block; border-bottom:2px dotted var(--primary); color:var(--primary); font-weight:700; cursor:pointer;
+    }
+    .tooltip{
+      position:fixed; z-index:20; max-width:260px; padding:.8rem .9rem; border-radius:12px; background:var(--panel); border:1px solid var(--border); box-shadow:var(--shadow)
+    }
+    .quiz-box,.practice-box,.reflection-box{
+      border:1px solid var(--border); background:var(--panel2); border-radius:12px; padding:1rem; margin-bottom:1rem;
+    }
+    .option-btn{
+      display:block; width:100%; text-align:left; margin-top:.5rem; background:var(--panel); border-radius:10px;
+    }
+    .option-btn.correct{border-color:var(--success); background:rgba(31,143,95,.08)}
+    .option-btn.incorrect{border-color:var(--danger); background:rgba(180,35,24,.08)}
+    .feedback{
+      margin-top:.75rem; padding:.75rem .9rem; border-left:4px solid var(--primary); background:var(--panel); border-radius:8px;
+    }
+    .hidden{display:none !important}
+    .match-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:.75rem}
+    .match-item,.drop-zone{
+      min-height:54px; display:flex; align-items:center; justify-content:center; text-align:center; background:var(--panel); border:1px dashed var(--border); border-radius:10px;
+    }
+    .drop-zone.selected{border-style:solid; border-color:var(--primary)}
+    textarea,input[type="text"]{
+      width:100%; padding:.8rem .9rem; border:1px solid var(--border); background:var(--panel); color:var(--text);
+    }
+    table{width:100%; border-collapse:collapse; margin-top:1rem}
+    th,td{padding:.8rem .7rem; border-bottom:1px solid var(--border); text-align:left}
+    .sr-only{
+      position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;
+    }
+    @media (max-width:700px){
+      .nav{justify-content:center}
+      .nav-links{justify-content:center}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="header">
+    <div class="container nav">
+      <div class="brand">
+        <button id="themeToggle" class="secondary" aria-label="Toggle high contrast">◐</button>
+        <h1>Robotics Learning Hub</h1>
+      </div>
+      <nav aria-label="Main navigation">
+        <ul class="nav-links">
+          <li><button data-page="home">Home</button></li>
+          <li><button data-page="unit">Units</button></li>
+          <li><button data-page="progress">My Progress</button></li>
+          <li><button data-page="teacher">Teacher View</button></li>
+          <li><button data-page="help">Help</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content" class="container">
+    <div id="homePage" class="page active"></div>
+    <div id="unitPage" class="page"></div>
+    <div id="sessionPage" class="page"></div>
+    <div id="progressPage" class="page"></div>
+    <div id="teacherPage" class="page"></div>
+    <div id="helpPage" class="page"></div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "robotics-learning-v1";
+    const topicData = {
+      id: "u1-t1",
+      grade: 8,
+      unit: "Unit 1: Foundations of Robotics",
+      title: "Fundamentals of Robotics",
+      objective: "Explain the purpose of robotics systems and how they combine inputs, processing, and outputs.",
+      explanation: {
+        text: "A robot is a machine that can sense information, make a decision, and then act. In robotics, we often describe this as Input → Process → Output. Sensors are the input devices. They detect things such as temperature, light, motion, time, or the presence of a tablet. The controller, such as an ESP32 microcontroller, is the processing part. It reads the sensor data and decides what action to take. Output devices, such as motors, LEDs, buzzers, or displays, carry out the action. A smart medicine dispenser is a good example of this system. It uses a clock to know when medicine is due, a sensor to detect if the tablet was released, and a motor to rotate a compartment so the correct dose is delivered.",
+        vocab: [
+          { word: "sensor", def: "A device that detects information from the environment and sends it to a controller." },
+          { word: "controller", def: "The part of a robot that processes data and decides what to do next." },
+          { word: "output", def: "The action or signal produced by a robot, such as movement, sound, or light." }
+        ],
+        visual: {
+          src: "data:image/svg+xml;utf8," + encodeURIComponent(`
+            <svg xmlns='http://www.w3.org/2000/svg' width='700' height='260' viewBox='0 0 700 260'>
+              <rect width='700' height='260' fill='#eef4fb'/>
+              <rect x='80' y='40' width='150' height='120' rx='16' fill='#dfeefd' stroke='#0d4d8c' stroke-width='3'/>
+              <text x='155' y='110' text-anchor='middle' font-size='28' fill='#0d4d8c' font-family='Arial'>Sensor</text>
+              <rect x='275' y='40' width='170' height='120' rx='16' fill='#bfe0ff' stroke='#0d4d8c' stroke-width='3'/>
+              <text x='360' y='110' text-anchor='middle' font-size='28' fill='#0d4d8c' font-family='Arial'>Controller</text>
+              <rect x='490' y='40' width='150' height='120' rx='16' fill='#d9f7e4' stroke='#1f8f5f' stroke-width='3'/>
+              <text x='565' y='110' text-anchor='middle' font-size='28' fill='#1f8f5f' font-family='Arial'>Motor</text>
+              <path d='M230 100 H275 M445 100 H490 M565 160 V205 H360 V160' fill='none' stroke='#0d4d8c' stroke-width='4' stroke-linecap='round'/>
+              <text x='350' y='225' text-anchor='middle' font-size='26' fill='#0d4d8c' font-family='Arial'>Input → Process → Output</text>
+            </svg>
+          `),
+          alt: "Diagram showing a sensor sending data to a controller, which then sends instructions to a motor."
+        }
+      },
+      guidedPractice: [
+        {
+          type: "matching",
+          prompt: "Match each part to its job in the smart medicine dispenser.",
+          left: ["RTC clock", "IR sensor", "Motor", "LED light"],
+          right: ["Detects time for scheduled drops", "Checks whether a tablet was released", "Moves the medicine carousel", "Shows status to the user"]
+        },
+        {
+          type: "fill",
+          prompt: "A ______ detects information from the environment and sends it to the controller.",
+          answer: "sensor"
+        },
+        {
+          type: "steps",
+          prompt: "Follow the steps of a simple medicine dispensing cycle.",
+          steps: [
+            "The ESP32 checks the current time.",
+            "The system compares the time to the scheduled dose.",
+            "A motor rotates the correct compartment.",
+            "A sensor checks whether the tablet was released.",
+            "A status light or buzzer tells the user the result."
+          ]
+        }
+      ],
+      quiz: [
+        {
+          q: "Which part of a robot is responsible for making decisions?",
+          options: ["Sensor", "Controller", "Motor", "Battery"],
+          answer: "Controller",
+          feedback: "The controller reads data from sensors and decides what action to take."
+        },
+        {
+          q: "True or false: A motor is an input device.",
+          options: ["True", "False"],
+          answer: "False",
+          feedback: "A motor is an output device because it creates movement."
+        },
+        {
+          q: "Which sentence best explains the Input → Process → Output model?",
+          options: [
+            "The robot reads information, decides what to do, and then acts.",
+            "The robot stores information and then deletes it.",
+            "The robot only listens for sound.",
+            "The robot sends power to a battery."
+          ],
+          answer: "The robot reads information, decides what to do, and then acts.",
+          feedback: "This model describes how a robot senses input, processes it, and then produces an output."
+        },
+        {
+          q: "What is the role of a sensor in a medicine dispenser?",
+          options: [
+            "It stores patient information.",
+            "It detects changes such as motion or timing.",
+            "It always adds medicine automatically.",
+            "It replaces the battery."
+          ],
+          answer: "It detects changes such as motion or timing.",
+          feedback: "Sensors help the system notice important conditions such as time or successful dispensing."
+        }
+      ],
+      extension: {
+        prompt: "Compare a simple robot and a smart medicine dispenser. Explain how both use input, processing, and output to complete a task.",
+        model: "Both systems collect information with sensors, make decisions with a controller, and perform actions with outputs such as motors, lights, or buzzers. A simple robot may detect obstacles and turn away. A smart medicine dispenser checks the time, decides whether a dose should be released, and then rotates a compartment or lights an alert. The purpose is different, but the basic design is the same."
+      },
+      reflectionPrompt: "How does the Input → Process → Output model help you understand what a robot is doing?"
+    };
+
+    const app = {
+      page: "home",
+      currentGrade: 8,
+      currentTopic: "u1-t1",
+      progress: {}
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : { grade: 8, progress: {}, reflections: {}, quizScores: {} };
+      } catch {
+        return { grade: 8, progress: {}, reflections: {}, quizScores: {} };
+      }
+    }
+
+    function saveState(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch {
+        console.warn("Storage blocked, continuing without saving.");
+      }
+    }
+
+    function getState() {
+      return loadState();
+    }
+
+    function setPage(page) {
+      app.page = page;
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.getElementById(page + "Page").classList.add("active");
+      if (page === "home") renderHome();
+      if (page === "unit") renderUnit();
+      if (page === "session") renderSession();
+      if (page === "progress") renderProgress();
+      if (page === "teacher") renderTeacher();
+      if (page === "help") renderHelp();
+    }
+
+    function applySavedSettings() {
+      const state = getState();
+      const savedSize = localStorage.getItem("font-size");
+      if (savedSize === "large") document.body.classList.add("large");
+      if (savedSize === "xlarge") document.body.classList.add("xlarge");
+      if (localStorage.getItem("high-contrast") === "true") document.body.classList.add("high-contrast");
+      if (state.grade) app.currentGrade = state.grade;
+    }
+
+    function renderHome() {
+      const state = getState();
+      const home = document.getElementById("homePage");
+      home.innerHTML = `
+        <section class="card hero">
+          <p class="eyebrow">Interactive Learning</p>
+          <h2>Choose your grade level</h2>
+          <div class="grade-grid">
+            ${[8,9,10].map(g => `
+              <button class="grade-btn primary" data-grade="${g}">Grade ${g}</button>
+            `).join("")}
+          </div>
+
+          <div class="actions">
+            <button id="continueBtn" class="primary">Continue where you left off</button>
+            <button id="resetBtn" class="secondary danger">Reset progress</button>
+          </div>
+
+          <div class="settings">
+            <label for="fontSize">Text size:</label>
+            <select id="fontSize">
+              <option value="normal">Normal</option>
+              <option value="large">Large</option>
+              <option value="xlarge">Extra Large</option>
+            </select>
+          </div>
+        </section>
+      `;
+
+      document.querySelectorAll("[data-grade]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const s = getState();
+          s.grade = Number(btn.dataset.grade);
+          saveState(s);
+          setPage("unit");
+        });
+      });
+
+      const font = document.getElementById("fontSize");
+      font.value = localStorage.getItem("font-size") || "normal";
+      font.addEventListener("change", e => {
+        document.body.classList.remove("large","xlarge");
+        const value = e.target.value;
+        if (value === "large") document.body.classList.add("large");
+        if (value === "xlarge") document.body.classList.add("xlarge");
+        localStorage.setItem("font-size", value);
+      });
+
+      const continueBtn = document.getElementById("continueBtn");
+      continueBtn.disabled = !state.lastTopic;
+      if (!state.lastTopic) continueBtn.style.opacity = "0.5";
+      continueBtn.addEventListener("click", () => {
+        if (state.lastTopic) {
+          app.currentTopic = state.lastTopic;
+          setPage("session");
+        }
+      });
+
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        if (confirm("Reset all saved progress on this device?")) {
+          localStorage.removeItem(STORAGE_KEY);
+          window.location.reload();
+        }
+      });
+    }
+
+    function renderUnit() {
+      const state = getState();
+      const unit = document.getElementById("unitPage");
+      const grade = state.grade || app.currentGrade;
+      unit.innerHTML = `
+        <section class="card">
+          <h2>Unit overview</h2>
+          <p><strong>Grade ${grade}</strong></p>
+          <div class="unit-list">
+            <button class="topic-btn" data-topic="${topicData.id}">
+              <span>${topicData.title}</span>
+              <span>Start</span>
+            </button>
+          </div>
+        </section>
+      `;
+      unit.querySelector("[data-topic]").addEventListener("click", () => {
+        app.currentTopic = topicData.id;
+        saveState({ ...state, lastTopic: topicData.id, grade });
+        setPage("session");
+      });
+    }
+
+    function renderSession() {
+      const state = getState();
+      const sess = document.getElementById("sessionPage");
+      sess.innerHTML = `
+        <div class="card">
+          <div class="session-head">
+            <div>
+              <p class="eyebrow">${topicData.grade} • ${topicData.unit}</p>
+              <h2>${topicData.title}</h2>
+            </div>
+            <div class="row">
+              <button class="secondary" data-page="unit">Back to Unit</button>
+            </div>
+          </div>
+
+          <div class="progress-bar" aria-label="Session progress">
+            <div class="progress-fill"></div>
+          </div>
+
+          <section>
+            <h3>Learning objective</h3>
+            <p>${topicData.objective}</p>
+          </section>
+
+          <section>
+            <h3>Explanation</h3>
+            <div>${renderExplanation(topicData.explanation)}</div>
+            <div class="row" style="margin-top:1rem">
+              <button class="primary" id="ttsPlay">Listen</button>
+              <button class="secondary" id="ttsPause">Pause</button>
+              <button class="secondary" id="ttsStop">Stop</button>
+              <label for="ttsSpeed">Speed:</label>
+              <select id="ttsSpeed">
+                <option value="0.75">0.75x</option>
+                <option value="1" selected>1x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+              </select>
+            </div>
+          </section>
+
+          <section>
+            <h3>Guided practice</h3>
+            ${renderPractice(topicData.guidedPractice)}
+          </section>
+
+          <section>
+            <h3>Quick check quiz</h3>
+            ${renderQuiz(topicData.quiz)}
+          </section>
+
+          <section>
+            <h3>Extension challenge</h3>
+            <div class="quiz-box">
+              <p>${topicData.extension.prompt}</p>
+              <textarea id="extensionInput" rows="4" placeholder="Write your answer here..."></textarea>
+              <div class="row" style="margin-top: .75rem">
+                <button class="primary" id="showModel">Reveal model answer</button>
+              </div>
+              <div id="modelAnswer" class="feedback hidden">${topicData.extension.model}</div>
+            </div>
+          </section>
+
+          <section>
+            <h3>Reflection</h3>
+            <div class="reflection-box">
+              <p>${topicData.reflectionPrompt}</p>
+              <textarea id="reflectionInput" rows="4" placeholder="Type your reflection..."></textarea>
+              <div class="row" style="margin-top: .75rem">
+                <button class="primary" id="saveReflection">Save reflection</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+
+      const savedReflection = (getState().reflections && getState().reflections[topicData.id]) || "";
+      if (savedReflection) {
+        const box = document.getElementById("reflectionInput");
+        if (box) box.value = savedReflection;
+      }
+
+      document.querySelector("[data-page='unit']").addEventListener("click", () => setPage("unit"));
+
+      document.getElementById("showModel").addEventListener("click", () => {
+        const ans = document.getElementById("modelAnswer");
+        ans.classList.remove("hidden");
+      });
+
+      document.getElementById("saveReflection").addEventListener("click", () => {
+        const val = document.getElementById("reflectionInput").value.trim();
+        const s = getState();
+        s.reflections = s.reflections || {};
+        s.reflections[topicData.id] = val;
+        s.lastTopic = topicData.id;
+        saveState(s);
+        alert("Reflection saved.");
+      });
+
+      const stateAfter = getState();
+      stateAfter.lastTopic = topicData.id;
+      saveState(stateAfter);
+
+      bindTTS();
+      bindQuiz();
+      bindPractice();
+    }
+
+    function renderExplanation(obj) {
+      let text = obj.text;
+      obj.vocab.forEach(item => {
+        const regex = new RegExp(`\\b${item.word}\\b`, "gi");
+        text = text.replace(regex, `<span class="vocab" tabindex="0" data-word="${item.word}">${item.word}</span>`);
+      });
+      const html = `
+        <p>${text.replace(/\\n/g, "<br><br>")}</p>
+        <figure>
+          <img src="${obj.visual.src}" alt="${obj.visual.alt}" style="max-width:100%; border-radius:12px; border:1px solid var(--border);">
+        </figure>
+      `;
+      setTimeout(() => {
+        document.querySelectorAll(".vocab").forEach(el => {
+          el.addEventListener("click", () => showTooltip(el.dataset.word));
+          el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showTooltip(el.dataset.word); } });
+        });
+      }, 0);
+      return html;
+    }
+
+    function showTooltip(word) {
+      const vocab = topicData.explanation.vocab.find(v => v.word.toLowerCase() === word.toLowerCase());
+      if (!vocab) return;
+      const tip = document.createElement("div");
+      tip.className = "tooltip";
+      tip.innerHTML = `<strong>${vocab.word}</strong><br>${vocab.def}`;
+      document.body.appendChild(tip);
+      const rect = document.querySelector(`[data-word="${word}"]`).getBoundingClientRect();
+      tip.style.left = (rect.left + 20) + "px";
+      tip.style.top = (rect.bottom + 10) + "px";
+      document.addEventListener("click", function hide(e) {
+        if (!e.target.closest(".vocab")) {
+          tip.remove();
+          document.removeEventListener("click", hide);
+        }
+      }, { once: true });
+    }
+
+    function renderPractice(items) {
+      return items.map(item => {
+        if (item.type === "matching") {
+          return `
+            <div class="quiz-box">
+              <p>${item.prompt}</p>
+              <div class="match-grid">
+                ${item.left.map(x => `<button class="match-item" data-left="${x}">${x}</button>`).join("")}
+              </div>
+              <div class="match-grid" style="margin-top:.75rem">
+                ${item.right.map(x => `<div class="drop-zone" data-right="${x}">${x}</div>`).join("")}
+              </div>
+              <div class="row" style="margin-top:.75rem">
+                <button class="primary check-match">Check matching</button>
+              </div>
+              <div class="feedback hidden" data-match-feedback></div>
+            </div>
+          `;
+        }
+        if (item.type === "fill") {
+          return `
+            <div class="quiz-box">
+              <p>${item.prompt}</p>
+              <input type="text" id="fillAnswer" placeholder="Type your answer" />
+              <div class="row" style="margin-top:.75rem">
+                <button class="primary check-fill">Check</button>
+              </div>
+              <div class="feedback hidden" data-fill-feedback></div>
+            </div>
+          `;
+        }
+        return `
+          <div class="quiz-box">
+            <p>${item.prompt}</p>
+            <ol>
+              ${item.steps.map(step => `<li>${step}</li>`).join("")}
+            </ol>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function bindPractice() {
+      const matching = document.querySelector(".check-match");
+      if (matching) {
+        const leftButtons = [...document.querySelectorAll(".match-item")];
+        const drops = [...document.querySelectorAll(".drop-zone")];
+        let selected = null;
+        leftButtons.forEach(btn => {
+          btn.addEventListener("click", () => {
+            selected = btn.dataset.left;
+            leftButtons.forEach(b => b.style.borderColor = "#cfe0ef");
+            btn.style.borderColor = "var(--primary)";
+          });
+        });
+        drops.forEach(zone => {
+          zone.addEventListener("click", () => {
+            if (!selected) return;
+            zone.textContent = `${selected} → ${zone.dataset.right}`;
+            zone.classList.add("selected");
+            zone.setAttribute("data-selected", selected);
+            selected = null;
+            leftButtons.forEach(b => b.style.borderColor = "#cfe0ef");
+          });
+        });
+        matching.addEventListener("click", () => {
+          const feedback = document.querySelector("[data-match-feedback]");
+          const matchMap = {
+            "RTC clock": "Detects time for scheduled drops",
+            "IR sensor": "Checks whether a tablet was released",
+            "Motor": "Moves the medicine carousel",
+            "LED light": "Shows status to the user"
+          };
+          const results = [...document.querySelectorAll(".drop-zone")].map(zone => {
+            const selectedText = zone.getAttribute("data-selected");
+            return selectedText && matchMap[selectedText] === zone.dataset.right;
+          });
+          const allCorrect = results.every(Boolean);
+          feedback.classList.remove("hidden");
+          feedback.textContent = allCorrect
+            ? "Correct. Each part matches the correct role in the system."
+            : "Review the names and jobs again. Sensors detect input, controllers decide, and outputs act.";
+        });
+      }
+
+      const fillButton = document.querySelector(".check-fill");
+      if (fillButton) {
+        fillButton.addEventListener("click", () => {
+          const val = document.getElementById("fillAnswer").value.trim().toLowerCase();
+          const feedback = document.querySelector("[data-fill-feedback]");
+          feedback.classList.remove("hidden");
+          feedback.textContent = val === "sensor"
+            ? "Correct. A sensor detects information from the environment and sends it to the controller."
+            : "Not quite. Think about the part that notices change and sends information to the robot.";
+        });
+      }
+    }
+
+    function renderQuiz(questions) {
+      return `
+        <div class="quiz-box">
+          ${questions.map((q, index) => `
+            <div class="question" data-q="${index}">
+              <p><strong>${index + 1}. ${q.q}</strong></p>
+              ${q.options.map(opt => `<button class="option-btn" data-index="${index}" data-option="${opt}">${opt}</button>`).join("")}
+              <div class="feedback hidden" data-feedback="${index}"></div>
+            </div>
+          `).join("")}
+          <div class="row" style="margin-top:1rem"><button class="primary" id="quizScoreBtn">Finish quiz</button></div>
+          <div id="quizSummary" class="feedback hidden"></div>
+        </div>
+      `;
+    }
+
+    function bindQuiz() {
+      const buttons = document.querySelectorAll(".option-btn");
+      const state = getState();
+      let answered = [];
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const qIndex = Number(btn.dataset.index);
+          const selected = btn.dataset.option;
+          const q = topicData.quiz[qIndex];
+          const isCorrect = selected === q.answer;
+          const feedback = document.querySelector(`[data-feedback="${qIndex}"]`);
+          const row = btn.parentElement;
+          row.querySelectorAll(".option-btn").forEach(b => {
+            b.disabled = true;
+            if (b.dataset.option === q.answer) b.classList.add("correct");
+            if (b.dataset.option === selected && !isCorrect) b.classList.add("incorrect");
+          });
+          feedback.classList.remove("hidden");
+          feedback.textContent = isCorrect
+            ? `Correct. ${q.feedback}`
+            : `Not quite. ${q.feedback}`;
+
+          if (!answered.includes(qIndex)) answered.push(qIndex);
+          state.quizScores = state.quizScores || {};
+          state.quizScores[topicData.id] = {
+            correct: answered.filter(i => topicData.quiz[i].answer === row.querySelectorAll(".option-btn")[0].dataset.option ? false : false).length
+          };
+          saveState(state);
+        });
+      });
+
+      const finish = document.getElementById("quizScoreBtn");
+      if (finish) {
+        finish.addEventListener("click", () => {
+          const questionEls = [...document.querySelectorAll(".question")];
+          let correct = 0;
+          questionEls.forEach((el, idx) => {
+            const selected = el.querySelector(".option-btn.correct");
+            if (selected) correct++;
+          });
+
+          const summary = document.getElementById("quizSummary");
+          summary.classList.remove("hidden");
+          summary.textContent = `Score: ${correct} / ${questionEls.length}. Review the feedback to improve your understanding.`;
+          const s = getState();
+          s.quizScores = s.quizScores || {};
+          s.quizScores[topicData.id] = { score: correct, total: questionEls.length };
+          s.lastTopic = topicData.id;
+          saveState(s);
+        });
+      }
+    }
+
+    function bindTTS() {
+      const play = document.getElementById("ttsPlay");
+      const pause = document.getElementById("ttsPause");
+      const stop = document.getElementById("ttsStop");
+      const speed = document.getElementById("ttsSpeed");
+
+      if (!("speechSynthesis" in window)) {
+        play.disabled = true;
+        pause.disabled = true;
+        stop.disabled = true;
+        play.textContent = "Speech not supported";
+        return;
+      }
+
+      play.addEventListener("click", () => {
+        const text = topicData.explanation.text;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = Number(speed.value);
+        window.speechSynthesis.speak(utterance);
+      });
+
+      pause.addEventListener("click", () => window.speechSynthesis.pause());
+      stop.addEventListener("click", () => window.speechSynthesis.cancel());
+    }
+
+    function renderProgress() {
+      const state = getState();
+      const page = document.getElementById("progressPage");
+      page.innerHTML = `
+        <section class="card">
+          <h2>My progress</h2>
+          <label for="studentName">Student name or ID:</label>
+          <input id="studentName" type="text" placeholder="e.g. A123" value="${state.studentName || ""}" />
+          <div class="row" style="margin-top:1rem">
+            <button class="primary" id="exportBtn">Export my results</button>
+          </div>
+          <div id="progressSummary" style="margin-top:1rem"></div>
+        </section>
+      `;
+
+      const summary = document.getElementById("progressSummary");
+      summary.innerHTML = `
+        <p><strong>Last topic:</strong> ${state.lastTopic || "None yet"}</p>
+        <p><strong>Quiz scores:</strong> ${JSON.stringify(state.quizScores || {})}</p>
+        <p><strong>Reflection:</strong> ${state.reflections && state.reflections[topicData.id] ? state.reflections[topicData.id] : "Not saved yet"}</p>
+      `;
+
+      document.getElementById("exportBtn").addEventListener("click", () => {
+        const s = getState();
+        s.studentName = document.getElementById("studentName").value.trim();
+        saveState(s);
+
+        const payload = {
+          exportTime: new Date().toISOString(),
+          studentName: s.studentName,
+          grade: s.grade,
+          lastTopic: s.lastTopic,
+          quizScores: s.quizScores || {},
+          reflections: s.reflections || {}
+        };
+
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `robotics-results-${s.studentName || "student"}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+    }
+
+    function renderTeacher() {
+      const page = document.getElementById("teacherPage");
+      page.innerHTML = `
+        <section class="card">
+          <h2>Teacher view</h2>
+          <input type="file" id="uploadFiles" accept=".json" multiple />
+          <div class="row" style="margin-top:1rem">
+            <button class="primary" id="downloadCsv">Download summary as CSV</button>
+          </div>
+          <div id="teacherTable"></div>
+        </section>
+      `;
+
+      const uploadFiles = document.getElementById("uploadFiles");
+      uploadFiles.addEventListener("change", async e => {
+        const files = [...e.target.files];
+        const records = [];
+        for (const file of files) {
+          const text = await file.text();
+          try {
+            const data = JSON.parse(text);
+            records.push({
+              name: data.studentName || file.name,
+              status: data.lastTopic ? "Complete" : "Incomplete",
+              score: data.quizScores && data.quizScores[topicData.id] ? data.quizScores[topicData.id].score || 0 : 0,
+              total: data.quizScores && data.quizScores[topicData.id] ? data.quizScores[topicData.id].total || 0 : 0
+            });
+          } catch {
+            records.push({ name: file.name, status: "Invalid JSON", score: 0, total: 0 });
+          }
+        }
+
+        const table = document.getElementById("teacherTable");
+        table.innerHTML = `
+          <table>
+            <thead><tr><th>Student</th><th>Status</th><th>Score</th></tr></thead>
+            <tbody>
+              ${records.map(r => `<tr><td>${r.name}</td><td>${r.status}</td><td>${r.score}/${r.total}</td></tr>`).join("")}
+            </tbody>
+          </table>
+        `;
+      });
+
+      document.getElementById("downloadCsv").addEventListener("click", () => {
+        const table = document.querySelector("#teacherTable table");
+        if (!table) return;
+        const rows = [...table.querySelectorAll("tr")].map(row => 
+          [...row.children].map(cell => `"${cell.textContent.trim()}"`).join(",")
+        );
+        const csv = rows.join("\\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "robotics-summary.csv";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+    }
+
+    function renderHelp() {
+      const page = document.getElementById("helpPage");
+      page.innerHTML = `
+        <section class="card">
+          <h2>Accessibility and help</h2>
+          <ul>
+            <li>Tab: move through buttons and fields</li>
+            <li>Enter or Space: activate buttons</li>
+            <li>Shift + Tab: go backward</li>
+            <li>Use the high-contrast button in the header</li>
+            <li>Text size can be adjusted from the home page</li>
+          </ul>
+          <p>All progress is stored only on this device. For teacher review, export results as JSON and upload them in the Teacher View page.</p>
+        </section>
+      `;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      applySavedSettings();
+
+      document.querySelectorAll("[data-page]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const page = btn.dataset.page;
+          setPage(page);
+        });
+      });
+
+      document.getElementById("themeToggle").addEventListener("click", () => {
+        document.body.classList.toggle("high-contrast");
+        localStorage.setItem("high-contrast", document.body.classList.contains("high-contrast"));
+      });
+
+      setPage("home");
+    });
+  </script>
+</body>
+</html>
